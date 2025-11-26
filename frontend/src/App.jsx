@@ -9,18 +9,31 @@ function App() {
   const [currentContact, setCurrentContact] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch contacts on mount
   useEffect(() => {
     fetchContacts();
   }, []);
 
+  // Fetch contacts when search term changes
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      fetchContacts(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
   // Fetch data from API
-  const fetchContacts = async () => {
+  const fetchContacts = async (search = "") => {
     setLoading(true);
     setError("");
     try {
-      const response = await fetch("http://127.0.0.1:5000/contacts");
+      const url = search 
+        ? `http://127.0.0.1:5000/contacts?search=${encodeURIComponent(search)}`
+        : "http://127.0.0.1:5000/contacts";
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -61,6 +74,16 @@ function App() {
   return (
     <div className="App">
       <h1>Contact Manager</h1>
+
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Search contacts..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+      </div>
 
       {loading && <p>Loading contacts...</p>}
       {error && <p className="error">{error}</p>}

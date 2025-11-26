@@ -4,6 +4,7 @@ const ContactForm = ({ existingContact = {}, updateCallback }) => {
   const [firstName, setFirstName] = useState(existingContact.firstName || "");
   const [lastName, setLastName] = useState(existingContact.lastName || "");
   const [email, setEmail] = useState(existingContact.email || "");
+  const [phone, setPhone] = useState(existingContact.phone || "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,6 +15,7 @@ const ContactForm = ({ existingContact = {}, updateCallback }) => {
     setFirstName(existingContact.firstName || "");
     setLastName(existingContact.lastName || "");
     setEmail(existingContact.email || "");
+    setPhone(existingContact.phone || "");
   }, [existingContact]);
 
   const validateForm = () => {
@@ -26,6 +28,11 @@ const ContactForm = ({ existingContact = {}, updateCallback }) => {
       setError("Please enter a valid email address.");
       return false;
     }
+    // Validate phone number if provided
+    if (phone.trim() && !/^\+?[1-9]\d{1,14}$/.test(phone.replace(/[-\s]/g, ''))) {
+      setError("Please enter a valid phone number.");
+      return false;
+    }
     return true;
   };
 
@@ -35,7 +42,7 @@ const ContactForm = ({ existingContact = {}, updateCallback }) => {
 
     if (!validateForm()) return;
 
-    const data = { firstName, lastName, email };
+    const data = { firstName, lastName, email, phone };
     const url = `http://127.0.0.1:5000/${
       updating ? `update_contact/${existingContact.id}` : "create_contact"
     }`;
@@ -100,6 +107,17 @@ const ContactForm = ({ existingContact = {}, updateCallback }) => {
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={loading}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="phone">Phone Number:</label>
+        <input
+          type="tel"
+          id="phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           disabled={loading}
         />
       </div>
